@@ -2476,7 +2476,7 @@ void restore(char * arg) {
     configInject("restore mqttid\r");
     configInject("restore updatesrv\r");
     configInject("restore updatefile\r");
-    configInject("restore key\r");
+//    configInject("restore key\r");
     configInject("restore co\r");
     configInject("co_negz 1\r");    
     configInject("restore particulate\r");
