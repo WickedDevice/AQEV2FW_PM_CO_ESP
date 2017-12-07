@@ -456,6 +456,7 @@ PGM_P const commands[] PROGMEM = {
   cmd_string_altitude,
   cmd_string_ntpsrv,
   cmd_string_tz_off,
+  cmd_string_co_blv,
   cmd_string_usr_lat,
   cmd_string_usr_lng,
   cmd_string_usr_loc_en,
@@ -2373,6 +2374,7 @@ void print_eeprom_value(char * arg) {
     }    
     Serial.print(F("    ")); Serial.println(F("CO Baseline Voltage Characterization:"));
     print_baseline_voltage_characterization(EEPROM_CO_BASELINE_VOLTAGE_TABLE);
+    Serial.println();
     
     print_label_with_star_if_not_backed_up("PM1.0 Offset [ug/m^3]: ", BACKUP_STATUS_PARTICULATE_CALIBRATION_BIT);
     print_eeprom_float((const float *) EEPROM_PM1P0_CAL_OFFSET);
@@ -2571,6 +2573,20 @@ void restore(char * arg) {
     eeprom_read_block(tmp, (const void *) EEPROM_BACKUP_CO_CAL_OFFSET, 4);
     eeprom_write_block(tmp, (void *) EEPROM_CO_CAL_OFFSET, 4);
   }
+  else if (strncmp("particulate", arg, 11) == 0) {
+    if (!BIT_IS_CLEARED(backup_check, BACKUP_STATUS_PARTICULATE_CALIBRATION_BIT)) {
+      Serial.println(F("Error: Particulate calibration must be backed up  "));
+      Serial.println(F("       prior to executing a 'restore'."));
+      return;
+    }
+
+    eeprom_read_block(tmp, (const void *) EEPROM_BACKUP_PM1P0_CAL_OFFSET, 4);
+    eeprom_write_block(tmp, (void *) EEPROM_PM1P0_CAL_OFFSET, 4);
+    eeprom_read_block(tmp, (const void *) EEPROM_BACKUP_PM2P5_CAL_OFFSET, 4);
+    eeprom_write_block(tmp, (void *) EEPROM_PM2P5_CAL_OFFSET, 4);
+    eeprom_read_block(tmp, (const void *) EEPROM_BACKUP_PM10P0_CAL_OFFSET, 4);
+    eeprom_write_block(tmp, (void *) EEPROM_PM10P0_CAL_OFFSET, 4);        
+  }  
   else if (strncmp("temp_off", arg, 8) == 0) {
     if (!BIT_IS_CLEARED(backup_check, BACKUP_STATUS_TEMPERATURE_CALIBRATION_BIT)) {
       Serial.println(F("Error: Temperature reporting offset should be backed up  "));
@@ -3788,6 +3804,19 @@ void backup(char * arg) {
       eeprom_write_word((uint16_t *) EEPROM_BACKUP_CHECK, backup_check);
     }
   }
+  else if (strncmp("particulate", arg, 11) == 0) {
+    eeprom_read_block(tmp, (const void *) EEPROM_PM1P0_CAL_OFFSET, 4);
+    eeprom_write_block(tmp, (void *) EEPROM_BACKUP_PM1P0_CAL_OFFSET, 4);
+    eeprom_read_block(tmp, (const void *) EEPROM_PM2P5_CAL_OFFSET, 4);
+    eeprom_write_block(tmp, (void *) EEPROM_BACKUP_PM2P5_CAL_OFFSET, 4);
+    eeprom_read_block(tmp, (const void *) EEPROM_PM10P0_CAL_OFFSET, 4);
+    eeprom_write_block(tmp, (void *) EEPROM_BACKUP_PM10P0_CAL_OFFSET, 4);    
+    
+    if (!BIT_IS_CLEARED(backup_check, BACKUP_STATUS_PARTICULATE_CALIBRATION_BIT)) {
+      CLEAR_BIT(backup_check, BACKUP_STATUS_PARTICULATE_CALIBRATION_BIT);
+      eeprom_write_word((uint16_t *) EEPROM_BACKUP_CHECK, backup_check);
+    }
+  }
   else if (strncmp("temp", arg, 4) == 0) {
     eeprom_read_block(tmp, (const void *) EEPROM_TEMPERATURE_OFFSET, 4);
     eeprom_write_block(tmp, (void *) EEPROM_BACKUP_TEMPERATURE_OFFSET, 4);
@@ -3820,6 +3849,7 @@ void backup(char * arg) {
     configInject("backup mqttpwd\r");
 //    configInject("backup key\r");
     configInject("backup co\r");
+    configInject("backup particulate\r");
     configInject("backup temp\r");
     configInject("backup hum\r");
     configInject("backup mac\r");
