@@ -1497,7 +1497,7 @@ void initializeNewConfigSettings(void){
     }
 
     configInject("softap enable\r");
-    configInject("sampling 5, 600, 60\r"); //FIXME
+    configInject("sampling 5, 300, 60\r");
     eeprom_write_byte((uint8_t *) EEPROM_2_2_0_SAMPLING_UPD, 1);
 
     // check if ntpsrv is pool.ntp.org, and if so, switch it to 0.airqualityegg.pool.ntp.org
@@ -2464,7 +2464,7 @@ void restore(char * arg) {
     // configInject("mqttuser wickeddevice\r");
     configInject("mqttprefix /orgs/wd/aqe/\r");
     configInject("mqttsuffix enable\r");
-    configInject("sampling 5, 600, 60\r"); // FIXME // sample every 5 seconds, average over 10 minutes, report every minute
+    configInject("sampling 5, 300, 60\r"); // sample every 5 seconds, average over 5 minutes, report every minute
     configInject("ntpsrv disable\r");
     configInject("ntpsrv 0.airqualityegg.pool.ntp.org\r");
     configInject("restore tz_off\r");
