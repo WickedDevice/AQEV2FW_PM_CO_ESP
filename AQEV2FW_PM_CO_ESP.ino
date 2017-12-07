@@ -6192,6 +6192,12 @@ void printCsvDataLine(){
   Serial.print(F(","));
   appendToString("," , dataString, &dataStringRemaining);
 
+  Serial.print(co_moving_average, 6);
+  appendToString(co_moving_average, 6, dataString, &dataStringRemaining);
+
+  Serial.print(F(","));
+  appendToString("," , dataString, &dataStringRemaining);  
+
   float pm1p0_moving_average = 0.0f;
   float pm2p5_moving_average = 0.0f;
   float pm10p0_moving_average = 0.0f;
